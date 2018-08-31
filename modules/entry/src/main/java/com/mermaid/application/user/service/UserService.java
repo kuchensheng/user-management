@@ -63,23 +63,15 @@ public interface UserService {
      * @param userIds 用户Id数组
      * @return
      */
-    List<UserInfoDTO> selectUserInfos(Integer[] userIds);
+    List<UserInfoDTO> selectUserInfos(Integer[] userIds,String appId);
 
     /**
      * 获取用户详情
-     * @param userId
+     * @param userId 用户Id
      * @return
      */
     UserInfoDTO selectUserInfoDetail(Integer userId);
 
-    /**
-     * 用户登录
-     * @param name
-     * @param password
-     * @param appId
-     * @return
-     */
-    HttpSession login(String name,String password,String appId);
 
     /**
      * 检查session是否还在，若不在返回空

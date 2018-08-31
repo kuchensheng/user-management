@@ -20,12 +20,12 @@ public enum EnumLoginType {
     /**
      * 安卓客户端请求
      */
-    ANDROID(3,"安卓"),
+    APP(3,"客户端"),
 
     /**
      * 苹果客户端请求
      */
-    IOS(4,"苹果"),
+    IPAD(4,"IPAD"),
     ;
     private Integer value;
 
@@ -33,6 +33,22 @@ public enum EnumLoginType {
 
     EnumLoginType(Integer value, String code) {
         this.value = value;
+        this.code = code;
+    }
+
+    public Integer getValue() {
+        return value;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
         this.code = code;
     }
 }

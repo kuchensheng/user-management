@@ -2,4 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mermaid.application.user.dao.extension.UserInfoDomainExtensionMapper" >
   <!-- 扩展自定义的SQl语句写在此文件中 -->
+    <delete id="batchDelete">
+      DELETE FROM userInfo
+      <where>
+        status != '1'
+        AND id IN (
+          <foreach collection="userIds" item="item" separator=",">
+            #{item}
+          </foreach>
+        )
+      </where>
+    </delete>
+    <select id="selectUserInfoList" resultType="com.mermaid.application.user.model.UserInfoDomain">
+        SELECT id, name, password, age, sex, status, phone, email, avatarId, qq, createTime, appId
+        FROM userInfo
+        <where>
+            <if test="userIds != null and userIds.size > 0">
+                id IN (
+                <foreach collection="userIds" item="item" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+            <if test="appId != null and appId != ''">
+                AND appId = #{appId,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <select id="selectUserInfoByNameAndPassword"
+            resultType="com.mermaid.application.user.model.UserInfoDomain">
+        SELECT id, `name`, password, age, sex, status, phone, email, avatarId, qq, createTime, appId
+        FROM userInfo
+        where `name` = #{userName,jdbcType=VARCHAR}
+        and password = #{password,jdbcType=VARCHAR}
+        <if test="appId != null and appId != ''">
+            AND appId = #{appId,jdbcType=VARCHAR}
+        </if>
+    </select>
 </mapper>
