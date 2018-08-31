@@ -2,6 +2,7 @@ package com.mermaid.application.user.service;
 
 import com.mermaid.application.constant.EnumLoginResult;
 import com.mermaid.application.dto.LoginLogDTO;
+import com.mermaid.framework.mvc.QueryResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -22,7 +23,7 @@ public interface LoginService {
      * @param loginTime 登录时间
      * @return
      */
-    HttpSession login(String userName, String password, Date loginTime, String appId,HttpServletRequest request);
+    HttpSession login(String userName, String password, Date loginTime, String appId);
 
     /**
      * 用户登出
@@ -41,12 +42,18 @@ public interface LoginService {
      * @param pageSize 条数
      * @return
      */
-    List<LoginLogDTO> selectLoginLogList(Integer userId,String appId,Date startTime,Date endTime,Integer pageNum,Integer pageSize);
+    QueryResult<LoginLogDTO> selectLoginLogList(Integer userId, String appId, Date startTime, Date endTime, Integer pageNum, Integer pageSize);
 
     /**
      * 查询上一次成功登录信息
      * @param userId
      * @return
      */
-    LoginLogDTO selectLastLoginLog(Integer userId, EnumLoginResult result);
+    LoginLogDTO selectLastLoginLog(Integer userId,EnumLoginResult result);
+
+    /**
+     * 检查session是否存在
+     * @return
+     */
+    Boolean getHttpSessionBySessionId();
 }

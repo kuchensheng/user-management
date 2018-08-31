@@ -2,4 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mermaid.application.user.dao.extension.LoginLogDomainExtensionMapper" >
   <!-- 扩展自定义的SQl语句写在此文件中 -->
+    <select id="selectUserLoginLog" resultType="com.mermaid.application.user.model.LoginLogDomain">
+      SELECT id, type, result, address, userName, userId, clientIp, createTime
+      FROM login_log
+      <where>
+        userId = #{userId,jdbcType=INTEGER}
+        <if test="startTime != null">
+          AND createTime <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+          AND createTime <![CDATA[<=]]> #{endTime}
+        </if>
+      </where>
+      order by id desc
+    </select>
+  <select id="selectUsersLoginLog" resultType="com.mermaid.application.user.model.LoginLogDomain">
+    SELECT id, type, result, address, userName, userId, clientIp, createTime
+    FROM login_log
+    <where>
+      <if test="userIdList != null and userIdList.size > 0">
+        userId IN (
+        <foreach collection="userIdList" item="item" separator=",">
+         #{item}
+        </foreach>
+        )
+      </if>
+      <if test="startTime != null">
+        AND createTime <![CDATA[>=]]> #{startTime}
+      </if>
+      <if test="endTime != null">
+        AND createTime <![CDATA[<=]]> #{endTime}
+      </if>
+    </where>
+    order by id desc
+  </select>
 </mapper>

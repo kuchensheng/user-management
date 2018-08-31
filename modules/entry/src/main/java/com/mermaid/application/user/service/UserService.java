@@ -72,11 +72,4 @@ public interface UserService {
      */
     UserInfoDTO selectUserInfoDetail(Integer userId);
 
-
-    /**
-     * 检查session是否还在，若不在返回空
-     * @param sessionId
-     * @return
-     */
-    HttpSession getHttpSessionBySessionId(String sessionId);
 }

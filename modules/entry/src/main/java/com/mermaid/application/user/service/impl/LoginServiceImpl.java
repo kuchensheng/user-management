@@ -1,6 +1,8 @@
 package com.mermaid.application.user.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.mermaid.application.constant.EnumLoginResult;
 import com.mermaid.application.constant.EnumLoginType;
 import com.mermaid.application.dto.LoginLogDTO;
@@ -14,14 +16,21 @@ import com.mermaid.application.user.service.LoginService;
 import com.mermaid.application.user.service.UserService;
 import com.mermaid.application.user.util.HttpRequestDeviceUtils;
 import com.mermaid.application.user.util.IPUtil;
+import com.mermaid.framework.mvc.BusinessException;
+import com.mermaid.framework.mvc.QueryResult;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,8 +55,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     @Transactional
-    public HttpSession login(String userName, String password, Date loginTime, String appId,HttpServletRequest request) {
+    public HttpSession login(String userName, String password, Date loginTime, String appI) {
         logger.info("用户登录，userName={}，clientIP={}",userName);
+        HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         EnumLoginResult result = EnumLoginResult.FAILURE;
         String clientIp = getIpAddress(request);
         UserInfoDomain userInfoDomain = userInfoDomainExtensionMapper.selectUserInfoByNameAndPassword(userName,password,null);
@@ -112,15 +122,82 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public List<LoginLogDTO> selectLoginLogList(Integer userId, String appId, Date startTime, Date endTime, Integer pageNum, Integer pageSize) {
+    public QueryResult<LoginLogDTO> selectLoginLogList(Integer userId, String appId, Date startTime, Date endTime, Integer pageNum, Integer pageSize) {
         logger.info("查询登录日志，userId={}，appId={}");
+        Page<LoginLogDomain> loginLogDomainList = null;
+        PageHelper.startPage(pageNum,pageSize);
+        if(null != userId) {
+            loginLogDomainList =loginLogDomainExtensionMapper.selectUserLoginLog(userId,startTime,endTime);
+        }else if(org.springframework.util.StringUtils.hasText(appId)) {
+            List<UserInfoDomain> userList = userInfoDomainExtensionMapper.selectUserInfoList(null, appId);
+            if(null == userList) {
+                return null;
+            }
+            List<Integer> userIdList = new ArrayList<>(userList.size());
+            for (UserInfoDomain userInfo : userList) {
+                userIdList.add(userInfo.getId());
+            }
+            loginLogDomainList = loginLogDomainExtensionMapper.selectUsersLoginLog(userIdList,startTime,endTime);
+        }
+        return parseListLogDomain2DTO(loginLogDomainList);
+    }
 
-        return null;
+    private QueryResult<LoginLogDTO> parseListLogDomain2DTO(Page<LoginLogDomain> loginLogDomainList) {
+        if(CollectionUtils.isEmpty(loginLogDomainList)) {
+            return null;
+        }
+        logger.info("LoginLogDomain 列表转为LoginLogDTO列表");
+        List<LoginLogDTO> result = new ArrayList<>(loginLogDomainList.size());
+        for (LoginLogDomain domain : loginLogDomainList){
+            result.add(parseLogDomain2DTO(domain));
+        }
+        return new QueryResult<>(loginLogDomainList.getTotal(),result);
+
+    }
+
+    public static LoginLogDTO parseLogDomain2DTO(LoginLogDomain domain) {
+        if (domain == null) {
+            return null;
+        }
+        LoginLogDTO loginLogDTO = new LoginLogDTO();
+        loginLogDTO.setId(domain.getId());
+        loginLogDTO.setType(domain.getType());
+        loginLogDTO.setResult(domain.getResult());
+        loginLogDTO.setAddress(domain.getAddress());
+        loginLogDTO.setUserName(domain.getUserName());
+        loginLogDTO.setUserId(domain.getUserId());
+        loginLogDTO.setClientIp(domain.getClientIp());
+        loginLogDTO.setLogTime(domain.getCreateTime());
+        return loginLogDTO;
     }
 
     @Override
     public LoginLogDTO selectLastLoginLog(Integer userId, EnumLoginResult result) {
-        return null;
+        logger.info("获取用户={}最近一次登录【{}】信息，不包含本次登录信息",userId,result);
+        if(null == result) {
+            logger.info("默认读取最近一次登录成功的信息");
+            result = EnumLoginResult.SUCCESS;
+        }
+        QueryResult<LoginLogDTO> loginLogList = selectLoginLogList(userId, null, null, null, 1, 2);
+        List<LoginLogDTO> items = loginLogList.getItems();
+        if(null != items) {
+            if(items.size() == 2) {
+                return items.get(1);
+            }else {
+                logger.info("第一次登录信息，则没有上一次登录信息");
+                return null;
+            }
+        }else {
+            throw BusinessException.withErrorCode("DATA_ERROR").withErrorMessageArguments("查询数据异常");
+        }
+    }
+
+    @Override
+    public Boolean getHttpSessionBySessionId() {
+        HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+        String sessionId = request.getSession().getId();
+        SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectByPrimaryKey(sessionId);
+        return null != sessionInfoDomain;
     }
 
     private String getIpAddress(HttpServletRequest request) {
