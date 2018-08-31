@@ -27,10 +27,9 @@ public interface LoginService {
 
     /**
      * 用户登出
-     * @param sessionId
      *
      */
-    void loginOut(String sessionId);
+    void loginOut();
 
     /**
      * 查询登录日志

@@ -16,6 +16,7 @@ import com.mermaid.application.user.service.LoginService;
 import com.mermaid.application.user.service.UserService;
 import com.mermaid.application.user.util.HttpRequestDeviceUtils;
 import com.mermaid.application.user.util.IPUtil;
+import com.mermaid.application.user.util.StringUtil;
 import com.mermaid.framework.mvc.BusinessException;
 import com.mermaid.framework.mvc.QueryResult;
 import org.apache.commons.lang.StringUtils;
@@ -60,7 +61,10 @@ public class LoginServiceImpl implements LoginService {
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         EnumLoginResult result = EnumLoginResult.FAILURE;
         String clientIp = getIpAddress(request);
-        UserInfoDomain userInfoDomain = userInfoDomainExtensionMapper.selectUserInfoByNameAndPassword(userName,password,null);
+        UserInfoDomain userInfoDomain = userInfoDomainExtensionMapper.selectUserInfoByNameAndPassword(userName, StringUtil.parse2UUID(password),null);
+        if(null == userInfoDomain) {
+            throw BusinessException.withErrorCode("NOT_FOUND_USER").withErrorMessageArguments("用户不存在");
+        }
         HttpSession session = null;
         if(null != userInfoDomain) {
             session = request.getSession();
@@ -71,7 +75,7 @@ public class LoginServiceImpl implements LoginService {
             String sessionInfo = JSONObject.toJSONString(session);
             SessionInfoDomain sessionInfoDomain = new SessionInfoDomain();
             sessionInfoDomain.setSessionId(session.getId());
-            sessionInfoDomain.setSessionInfo(sessionInfo);
+//            sessionInfoDomain.setSessionInfo(sessionInfo);
             sessionInfoDomain.setExpire(sessionExpired);
             sessionInfoDomainExtensionMapper.insertSelective(sessionInfoDomain);
             result = EnumLoginResult.SUCCESS;
@@ -104,10 +108,13 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void loginOut(String sessionId) {
-        logger.info("用户登出，sessionId={}",sessionId);
-        if(existedSession(sessionId)) {
-            sessionInfoDomainExtensionMapper.deleteByPrimaryKey(sessionId);
+    public void loginOut() {
+        HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+        logger.info("用户登出，sessionId={}",request.getSession().getId());
+        if(existedSession(request.getSession().getId())) {
+            sessionInfoDomainExtensionMapper.deleteByPrimaryKey(request.getSession().getId());
+            request.getSession().removeAttribute("id");
+            request.getSession().removeAttribute("name");
         }
     }
 

@@ -8,6 +8,7 @@ import com.mermaid.application.user.dao.extension.UserInfoDomainExtensionMapper;
 import com.mermaid.application.user.model.UserInfoDomain;
 import com.mermaid.application.user.service.UserService;
 import com.mermaid.application.user.util.EnumHelperUtil;
+import com.mermaid.application.user.util.StringUtil;
 import com.mermaid.framework.mvc.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,17 +53,13 @@ public class UserServiceImpl implements UserService {
         userInfoDomain.setCreateTime(createTime);
         userInfoDomain.setEmail(email);
         userInfoDomain.setName(name);
-        userInfoDomain.setPassword(parse2UUID(password));
+        userInfoDomain.setPassword(StringUtil.parse2UUID(password));
         userInfoDomain.setPhone(phone);
         userInfoDomain.setQq(qq);
         userInfoDomain.setSex(String.valueOf(sex.getValue()));
         userInfoDomain.setStatus(String.valueOf(status.getValue()));
         userInfoDomainExtensionMapper.insertSelective(userInfoDomain);
         return userInfoDomain.getId();
-    }
-
-    private String parse2UUID(String password) {
-        return UUID.nameUUIDFromBytes(password.getBytes()).toString();
     }
 
     @Override
@@ -75,7 +72,7 @@ public class UserServiceImpl implements UserService {
         userInfoDomain.setAppId(appId);
         userInfoDomain.setEmail(email);
         userInfoDomain.setName(name);
-        userInfoDomain.setPassword(parse2UUID(password));
+        userInfoDomain.setPassword(StringUtil.parse2UUID(password));
         userInfoDomain.setPhone(phone);
         userInfoDomain.setQq(qq);
         userInfoDomain.setSex(String.valueOf(sex.getValue()));
