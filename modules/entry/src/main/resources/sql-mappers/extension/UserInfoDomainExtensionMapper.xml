@@ -17,7 +17,7 @@
         SELECT id, name, password, age, sex, status, phone, email, avatarId, qq, createTime, appId
         FROM userInfo
         <where>
-            <if test="userIds != null and userIds.size > 0">
+            <if test="userIds != null and userIds.length > 0">
                 id IN (
                 <foreach collection="userIds" item="item" separator=",">
                     #{item}

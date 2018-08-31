@@ -103,12 +103,4 @@ public class UserController {
     ) {
         return APIResponse.success(userService.selectUserInfos(null,appId));
     }
-
-    @ApiOperation(value = "根据userIds数组获取用户信息列表")
-    @RequestMapping(value = "/app/user/list",method = RequestMethod.GET)
-    public APIResponse<List<UserInfoDTO>> getUserInfoListByUserIds(
-            @ApiParam(required = true,name = "userIds",value = "应用Id") @RequestParam(value = "userIds") Integer[] userIds
-    ) {
-        return APIResponse.success(userService.selectUserInfos(userIds,null));
-    }
 }

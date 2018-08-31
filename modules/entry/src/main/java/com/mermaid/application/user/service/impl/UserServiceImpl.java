@@ -7,6 +7,7 @@ import com.mermaid.application.user.dao.extension.SessionInfoDomainExtensionMapp
 import com.mermaid.application.user.dao.extension.UserInfoDomainExtensionMapper;
 import com.mermaid.application.user.model.UserInfoDomain;
 import com.mermaid.application.user.service.UserService;
+import com.mermaid.application.user.util.EnumHelperUtil;
 import com.mermaid.framework.mvc.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserInfoDTO> selectUserInfos(Integer[] userIds,String appId) {
-        logger.info("获取用户列表，userIds={}，appId={}",userIds.toString(),appId);
+        logger.info("获取用户列表，userIds={}，appId={}",userIds,appId);
         List<UserInfoDomain> userInfoDomainList = userInfoDomainExtensionMapper.selectUserInfoList(userIds,appId);
         return parseUserInfoList2DTOList(userInfoDomainList);
     }
@@ -129,8 +130,8 @@ public class UserServiceImpl implements UserService {
         userInfoDTO.setId(userInfoDomain.getId());
         userInfoDTO.setName(userInfoDomain.getName());
         userInfoDTO.setAge(userInfoDomain.getAge());
-        userInfoDTO.setSex(userInfoDomain.getSex());
-        userInfoDTO.setStatus(userInfoDomain.getStatus());
+        userInfoDTO.setSex(EnumHelperUtil.getByIntegerTypeCode(EnumSex.class,"getValue",Integer.valueOf(userInfoDomain.getSex())).name());
+        userInfoDTO.setStatus(EnumHelperUtil.getByIntegerTypeCode(EnumUserStatus.class,"getValue",Integer.valueOf(userInfoDomain.getSex())).name());
         userInfoDTO.setPhone(userInfoDomain.getPhone());
         userInfoDTO.setEmail(userInfoDomain.getEmail());
         userInfoDTO.setAvatarId(userInfoDomain.getAvatarId());
