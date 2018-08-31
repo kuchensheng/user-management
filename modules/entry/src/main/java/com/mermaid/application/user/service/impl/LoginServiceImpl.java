@@ -14,6 +14,7 @@ import com.mermaid.application.user.model.SessionInfoDomain;
 import com.mermaid.application.user.model.UserInfoDomain;
 import com.mermaid.application.user.service.LoginService;
 import com.mermaid.application.user.service.UserService;
+import com.mermaid.application.user.util.EnumHelperUtil;
 import com.mermaid.application.user.util.HttpRequestDeviceUtils;
 import com.mermaid.application.user.util.IPUtil;
 import com.mermaid.application.user.util.StringUtil;
@@ -145,6 +146,8 @@ public class LoginServiceImpl implements LoginService {
                 userIdList.add(userInfo.getId());
             }
             loginLogDomainList = loginLogDomainExtensionMapper.selectUsersLoginLog(userIdList,startTime,endTime);
+        } else {
+            loginLogDomainList = loginLogDomainExtensionMapper.selectUsersLoginLog(null,startTime,endTime);
         }
         return parseListLogDomain2DTO(loginLogDomainList);
     }
@@ -168,8 +171,8 @@ public class LoginServiceImpl implements LoginService {
         }
         LoginLogDTO loginLogDTO = new LoginLogDTO();
         loginLogDTO.setId(domain.getId());
-        loginLogDTO.setType(domain.getType());
-        loginLogDTO.setResult(domain.getResult());
+        loginLogDTO.setType((EnumHelperUtil.getByIntegerTypeCode(EnumLoginType.class,"getValue",Integer.valueOf(domain.getType()))).name());
+        loginLogDTO.setResult(EnumHelperUtil.getByIntegerTypeCode(EnumLoginResult.class,"getValue",Integer.valueOf(domain.getResult())).name());
         loginLogDTO.setAddress(domain.getAddress());
         loginLogDTO.setUserName(domain.getUserName());
         loginLogDTO.setUserId(domain.getUserId());
