@@ -20,6 +20,7 @@ import com.mermaid.application.user.util.IPUtil;
 import com.mermaid.application.user.util.StringUtil;
 import com.mermaid.framework.mvc.BusinessException;
 import com.mermaid.framework.mvc.QueryResult;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     @Transactional
-    public HttpSession login(String userName, String password, Date loginTime, String appI) {
+    public Boolean login(String userName, String password, Date loginTime, String appI) {
         logger.info("用户登录，userName={}，clientIP={}",userName);
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         EnumLoginResult result = EnumLoginResult.FAILURE;
@@ -66,9 +67,12 @@ public class LoginServiceImpl implements LoginService {
         if(null == userInfoDomain) {
             throw BusinessException.withErrorCode("NOT_FOUND_USER").withErrorMessageArguments("用户不存在");
         }
-        HttpSession session = null;
+        HttpSession session = request.getSession();;
         if(null != userInfoDomain) {
-            session = request.getSession();
+            logger.info("判断用户是否已经登录了");
+            if(existedSession(session.getId())) {
+                throw BusinessException.withErrorCode("CANNOT_REPEAT_LOGIN").withErrorMessageArguments("请勿重复登录");
+            }
             session.setMaxInactiveInterval(sessionExpired * 60);
             session.setAttribute("id",userInfoDomain.getId());
             session.setAttribute("name",userInfoDomain.getName());
@@ -105,7 +109,7 @@ public class LoginServiceImpl implements LoginService {
         loginLogDomain.setUserName(userInfoDomain.getName());
         loginLogDomainExtensionMapper.insertSelective(loginLogDomain);
         logger.info("登录完成，登录结果={}",result.toString());
-        return session;
+        return true;
     }
 
     @Override
@@ -113,7 +117,7 @@ public class LoginServiceImpl implements LoginService {
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         logger.info("用户登出，sessionId={}",request.getSession().getId());
         if(existedSession(request.getSession().getId())) {
-            sessionInfoDomainExtensionMapper.deleteByPrimaryKey(request.getSession().getId());
+            sessionInfoDomainExtensionMapper.deleteBySessionId(request.getSession().getId());
             request.getSession().removeAttribute("id");
             request.getSession().removeAttribute("name");
         }
@@ -125,7 +129,7 @@ public class LoginServiceImpl implements LoginService {
      * @return
      */
     private boolean existedSession(String sessionId) {
-        SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectByPrimaryKey(sessionId);
+        SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectBySessionId(sessionId);
         return null != sessionInfoDomain;
     }
 
@@ -191,11 +195,11 @@ public class LoginServiceImpl implements LoginService {
         QueryResult<LoginLogDTO> loginLogList = selectLoginLogList(userId, null, null, null, 1, 2);
         List<LoginLogDTO> items = loginLogList.getItems();
         if(null != items) {
-            if(items.size() == 2) {
+            if(items.size() >1 ) {
                 return items.get(1);
             }else {
                 logger.info("第一次登录信息，则没有上一次登录信息");
-                return null;
+                throw BusinessException.withErrorCode("IS_FIRST_LOGIN").withErrorMessageArguments("第一次登录");
             }
         }else {
             throw BusinessException.withErrorCode("DATA_ERROR").withErrorMessageArguments("查询数据异常");
@@ -206,8 +210,7 @@ public class LoginServiceImpl implements LoginService {
     public Boolean getHttpSessionBySessionId() {
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         String sessionId = request.getSession().getId();
-        SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectByPrimaryKey(sessionId);
-        return null != sessionInfoDomain;
+        return existedSession(sessionId);
     }
 
     private String getIpAddress(HttpServletRequest request) {

@@ -23,7 +23,7 @@ public interface LoginService {
      * @param loginTime 登录时间
      * @return
      */
-    HttpSession login(String userName, String password, Date loginTime, String appId);
+    Boolean login(String userName, String password, Date loginTime, String appId);
 
     /**
      * 用户登出

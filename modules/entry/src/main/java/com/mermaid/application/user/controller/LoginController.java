@@ -36,7 +36,7 @@ public class LoginController {
 
     @ApiOperation(value = "用户登录")
     @RequestMapping(value = "/app/user/login",method = RequestMethod.POST)
-    public APIResponse<HttpSession> login(
+    public APIResponse<Boolean> login(
             @ApiParam(required = true,name = "name",value = "用户名") @RequestParam(value = "name") String name,
             @ApiParam(required = true,name = "password",value = "密码") @RequestParam(value = "password") String password,
             @ApiParam(name = "loinTime",value = "登录时间") @RequestParam(required = false,value = "loginTime") Date loginTime,

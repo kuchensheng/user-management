@@ -2,70 +2,94 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mermaid.application.user.dao.basic.SessionInfoDomainMapper" >
   <resultMap id="BaseResultMap" type="com.mermaid.application.user.model.SessionInfoDomain" >
-    <id column="sessionId" property="sessionId" jdbcType="VARCHAR" />
-    <result column="sessionInfo" property="sessionInfo" jdbcType="VARCHAR" />
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sessionId" property="sessionId" jdbcType="VARCHAR" />
     <result column="expire" property="expire" jdbcType="INTEGER" />
   </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.mermaid.application.user.model.SessionInfoDomain" extends="BaseResultMap" >
+    <result column="sessionInfo" property="sessionInfo" jdbcType="LONGVARCHAR" />
+  </resultMap>
   <sql id="Base_Column_List" >
-    sessionId, sessionInfo, expire
+    id, sessionId, expire
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+  <sql id="Blob_Column_List" >
+    sessionInfo
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
     from sessionInfo
-    where sessionId = #{sessionId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from sessionInfo
-    where sessionId = #{sessionId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
-    insert into sessionInfo (sessionId, sessionInfo, expire
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sessionInfo (sessionId, expire, sessionInfo
       )
-    values (#{sessionId,jdbcType=VARCHAR}, #{sessionInfo,jdbcType=VARCHAR}, #{expire,jdbcType=INTEGER}
+    values (#{sessionId,jdbcType=VARCHAR}, #{expire,jdbcType=INTEGER}, #{sessionInfo,jdbcType=LONGVARCHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
     insert into sessionInfo
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="sessionId != null" >
         sessionId,
       </if>
-      <if test="sessionInfo != null" >
-        sessionInfo,
-      </if>
       <if test="expire != null" >
         expire,
+      </if>
+      <if test="sessionInfo != null" >
+        sessionInfo,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="sessionId != null" >
         #{sessionId,jdbcType=VARCHAR},
       </if>
-      <if test="sessionInfo != null" >
-        #{sessionInfo,jdbcType=VARCHAR},
-      </if>
       <if test="expire != null" >
         #{expire,jdbcType=INTEGER},
+      </if>
+      <if test="sessionInfo != null" >
+        #{sessionInfo,jdbcType=LONGVARCHAR},
       </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
     update sessionInfo
     <set >
-      <if test="sessionInfo != null" >
-        sessionInfo = #{sessionInfo,jdbcType=VARCHAR},
+      <if test="sessionId != null" >
+        sessionId = #{sessionId,jdbcType=VARCHAR},
       </if>
       <if test="expire != null" >
         expire = #{expire,jdbcType=INTEGER},
       </if>
+      <if test="sessionInfo != null" >
+        sessionInfo = #{sessionInfo,jdbcType=LONGVARCHAR},
+      </if>
     </set>
-    where sessionId = #{sessionId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
+    update sessionInfo
+    set sessionId = #{sessionId,jdbcType=VARCHAR},
+      expire = #{expire,jdbcType=INTEGER},
+      sessionInfo = #{sessionInfo,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
     update sessionInfo
-    set sessionInfo = #{sessionInfo,jdbcType=VARCHAR},
+    set sessionId = #{sessionId,jdbcType=VARCHAR},
       expire = #{expire,jdbcType=INTEGER}
-    where sessionId = #{sessionId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

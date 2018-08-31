@@ -74,18 +74,18 @@
             <property name="useActualColumnNames" value="true"></property>
             <generatedKey column="id" sqlStatement="Mysql" identity="true"></generatedKey>
         </table>
-        <table tableName="userInfo" domainObjectName="UserInfoDomain" enableCountByExample="false"
-               enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-               selectByExampleQueryId="false">
-            <property name="useActualColumnNames" value="true"></property>
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"></generatedKey>
-        </table>
-        <table tableName="login_log" domainObjectName="LoginLogDomain" enableCountByExample="false"
-               enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-               selectByExampleQueryId="false">
-            <property name="useActualColumnNames" value="true"></property>
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"></generatedKey>
-        </table>
+        <!--<table tableName="userInfo" domainObjectName="UserInfoDomain" enableCountByExample="false"-->
+               <!--enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
+               <!--selectByExampleQueryId="false">-->
+            <!--<property name="useActualColumnNames" value="true"></property>-->
+            <!--<generatedKey column="id" sqlStatement="Mysql" identity="true"></generatedKey>-->
+        <!--</table>-->
+        <!--<table tableName="login_log" domainObjectName="LoginLogDomain" enableCountByExample="false"-->
+               <!--enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
+               <!--selectByExampleQueryId="false">-->
+            <!--<property name="useActualColumnNames" value="true"></property>-->
+            <!--<generatedKey column="id" sqlStatement="Mysql" identity="true"></generatedKey>-->
+        <!--</table>-->
         <!--<table tableName="build_log" domainObjectName="BuildLogDomain" enableCountByExample="false"-->
                <!--enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
                <!--selectByExampleQueryId="false">-->
