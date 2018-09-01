@@ -2,6 +2,7 @@ package com.mermaid.application.user.service;
 
 import com.mermaid.application.constant.EnumLoginResult;
 import com.mermaid.application.dto.LoginLogDTO;
+import com.mermaid.application.user.model.SessionInfoDomain;
 import com.mermaid.framework.mvc.QueryResult;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,4 +56,6 @@ public interface LoginService {
      * @return
      */
     Boolean getHttpSessionBySessionId();
+
+    List<SessionInfoDomain> selectAllSessionInfo();
 }

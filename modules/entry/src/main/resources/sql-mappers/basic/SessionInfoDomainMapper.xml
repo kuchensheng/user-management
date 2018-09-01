@@ -5,12 +5,13 @@
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="sessionId" property="sessionId" jdbcType="VARCHAR" />
     <result column="expire" property="expire" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <resultMap id="ResultMapWithBLOBs" type="com.mermaid.application.user.model.SessionInfoDomain" extends="BaseResultMap" >
     <result column="sessionInfo" property="sessionInfo" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, sessionId, expire
+    id, sessionId, expire, createTime
   </sql>
   <sql id="Blob_Column_List" >
     sessionInfo
@@ -31,10 +32,10 @@
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into sessionInfo (sessionId, expire, sessionInfo
-      )
-    values (#{sessionId,jdbcType=VARCHAR}, #{expire,jdbcType=INTEGER}, #{sessionInfo,jdbcType=LONGVARCHAR}
-      )
+    insert into sessionInfo (sessionId, expire, createTime, 
+      sessionInfo)
+    values (#{sessionId,jdbcType=VARCHAR}, #{expire,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{sessionInfo,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
@@ -48,6 +49,9 @@
       <if test="expire != null" >
         expire,
       </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
       <if test="sessionInfo != null" >
         sessionInfo,
       </if>
@@ -58,6 +62,9 @@
       </if>
       <if test="expire != null" >
         #{expire,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
       </if>
       <if test="sessionInfo != null" >
         #{sessionInfo,jdbcType=LONGVARCHAR},
@@ -73,6 +80,9 @@
       <if test="expire != null" >
         expire = #{expire,jdbcType=INTEGER},
       </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
       <if test="sessionInfo != null" >
         sessionInfo = #{sessionInfo,jdbcType=LONGVARCHAR},
       </if>
@@ -83,13 +93,15 @@
     update sessionInfo
     set sessionId = #{sessionId,jdbcType=VARCHAR},
       expire = #{expire,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
       sessionInfo = #{sessionInfo,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
     update sessionInfo
     set sessionId = #{sessionId,jdbcType=VARCHAR},
-      expire = #{expire,jdbcType=INTEGER}
+      expire = #{expire,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

@@ -5,6 +5,8 @@ import com.mermaid.application.user.model.SessionInfoDomain;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface SessionInfoDomainExtensionMapper extends SessionInfoDomainMapper {
     int deleteBySessionId(@Param("sessionId") String sessionId);
@@ -15,4 +17,11 @@ public interface SessionInfoDomainExtensionMapper extends SessionInfoDomainMappe
      * @return
      */
     SessionInfoDomain selectBySessionId(@Param("sessionId") String sessionId);
+
+    /**
+     * 获取所有的session信息
+     * @return
+     */
+    List<SessionInfoDomain> selectAllSessionInfo();
+
 }

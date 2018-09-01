@@ -6,6 +6,9 @@
     DELETE FROM sessionInfo WHERE sessionId = #{sessionId,jdbcType=VARCHAR}
   </delete>
   <select id="selectBySessionId" resultType="com.mermaid.application.user.model.SessionInfoDomain">
-    SELECT * FROM sessionInfo WHERE sessionId = #{sessionId,jdbcType=VARCHAR}
+    SELECT id, sessionId, expire FROM sessionInfo WHERE sessionId = #{sessionId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAllSessionInfo" resultType="com.mermaid.application.user.model.SessionInfoDomain">
+    select id, sessionId, expire FROM sessionInfo
   </select>
 </mapper>

@@ -213,6 +213,12 @@ public class LoginServiceImpl implements LoginService {
         return existedSession(sessionId);
     }
 
+    @Override
+    public List<SessionInfoDomain> selectAllSessionInfo() {
+        logger.info("获取所有session信息");
+        return sessionInfoDomainExtensionMapper.selectAllSessionInfo();
+    }
+
     private String getIpAddress(HttpServletRequest request) {
         String ip = null;
 
