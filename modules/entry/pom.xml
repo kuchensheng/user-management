@@ -27,6 +27,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sdk</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.mermaid.framework</groupId>
+            <artifactId>mermaid-redis</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -66,44 +70,44 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.mybatis.generator</groupId>
-                <artifactId>mybatis-generator-maven-plugin</artifactId>
-                <version>1.3.2</version>
-                <configuration>
-                    <configurationFile>src/test/resources/generator-config.xml</configurationFile>
-                    <overwrite>true</overwrite>
-                    <verbose>false</verbose>
-                </configuration>
+            <!--<plugin>-->
+                <!--<groupId>org.mybatis.generator</groupId>-->
+                <!--<artifactId>mybatis-generator-maven-plugin</artifactId>-->
+                <!--<version>1.3.2</version>-->
+                <!--<configuration>-->
+                    <!--<configurationFile>src/test/resources/generator-config.xml</configurationFile>-->
+                    <!--<overwrite>true</overwrite>-->
+                    <!--<verbose>false</verbose>-->
+                <!--</configuration>-->
 
-                <dependencies>
-                    <dependency>
-                        <groupId>mysql</groupId>
-                        <artifactId>mysql-connector-java</artifactId>
-                        <version>5.1.39</version>
-                    </dependency>
+                <!--<dependencies>-->
+                    <!--<dependency>-->
+                        <!--<groupId>mysql</groupId>-->
+                        <!--<artifactId>mysql-connector-java</artifactId>-->
+                        <!--<version>5.1.39</version>-->
+                    <!--</dependency>-->
 
-                    <dependency>
-                        <groupId>com.mermaid.framework</groupId>
-                        <artifactId>mermaid-plugin</artifactId>
-                        <version>1.0-SNAPSHOT</version>
-                    </dependency>
+                    <!--<dependency>-->
+                        <!--<groupId>com.mermaid.framework</groupId>-->
+                        <!--<artifactId>mermaid-plugin</artifactId>-->
+                        <!--<version>1.0-SNAPSHOT</version>-->
+                    <!--</dependency>-->
 
-                    <!-- <dependency> <groupId>org.jmockit</groupId> <artifactId>jmockit</artifactId>
-                        </dependency> <dependency> <groupId>org.jmockit</groupId> <artifactId>jmockit-coverage</artifactId>
-                        </dependency> -->
+                    <!--&lt;!&ndash; <dependency> <groupId>org.jmockit</groupId> <artifactId>jmockit</artifactId>-->
+                        <!--</dependency> <dependency> <groupId>org.jmockit</groupId> <artifactId>jmockit-coverage</artifactId>-->
+                        <!--</dependency> &ndash;&gt;-->
 
-                </dependencies>
+                <!--</dependencies>-->
 
-                <executions>
-                    <execution>
-                        <id>Generate MyBatis Artifacts</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>Generate MyBatis Artifacts</id>-->
+                        <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

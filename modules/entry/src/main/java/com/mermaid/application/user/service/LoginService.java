@@ -58,4 +58,6 @@ public interface LoginService {
     Boolean getHttpSessionBySessionId();
 
     List<SessionInfoDomain> selectAllSessionInfo();
+
+    Boolean deleteById(Integer sessionId);
 }

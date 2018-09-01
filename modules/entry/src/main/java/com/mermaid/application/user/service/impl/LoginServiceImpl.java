@@ -219,6 +219,11 @@ public class LoginServiceImpl implements LoginService {
         return sessionInfoDomainExtensionMapper.selectAllSessionInfo();
     }
 
+    @Override
+    public Boolean deleteById(Integer sessionId) {
+        return sessionInfoDomainExtensionMapper.deleteByPrimaryKey(sessionId) > 0;
+    }
+
     private String getIpAddress(HttpServletRequest request) {
         String ip = null;
 
