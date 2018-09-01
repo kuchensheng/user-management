@@ -33,6 +33,7 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <framework.version>1.0-SNAPSHOT</framework.version>
+    <redis.version>1.0-SNAPSHOT</redis.version>
   </properties>
 
   <dependencyManagement>
@@ -46,6 +47,11 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>sdk</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.mermaid.framework</groupId>
+        <artifactId>mermaid-redis</artifactId>
+        <version>${redis.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
