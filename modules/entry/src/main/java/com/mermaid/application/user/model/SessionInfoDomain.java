@@ -20,6 +20,16 @@ public class SessionInfoDomain {
      */
     private Date createTime;
 
+    /**
+     * 用户Id
+     */
+    private Integer userId;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
     private String sessionInfo;
 
     public Integer getId() {
@@ -52,6 +62,22 @@ public class SessionInfoDomain {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 
     public String getSessionInfo() {

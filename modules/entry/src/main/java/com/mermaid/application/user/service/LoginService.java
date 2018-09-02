@@ -2,11 +2,11 @@ package com.mermaid.application.user.service;
 
 import com.mermaid.application.constant.EnumLoginResult;
 import com.mermaid.application.dto.LoginLogDTO;
+import com.mermaid.application.dto.SessionInfoDTO;
+import com.mermaid.application.dto.UserInfoDTO;
 import com.mermaid.application.user.model.SessionInfoDomain;
 import com.mermaid.framework.mvc.QueryResult;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.List;
 
@@ -24,13 +24,14 @@ public interface LoginService {
      * @param loginTime 登录时间
      * @return
      */
-    Boolean login(String userName, String password, Date loginTime, String appId);
+    SessionInfoDTO login(String userName, String password, Date loginTime, String appId);
 
     /**
      * 用户登出
      *
+     * @param userId
      */
-    void loginOut();
+    void loginOut(Integer userId);
 
     /**
      * 查询登录日志
@@ -60,4 +61,11 @@ public interface LoginService {
     List<SessionInfoDomain> selectAllSessionInfo();
 
     Boolean deleteById(Integer sessionId);
+
+    /**
+     * 根据sessionId获取用户登录信息
+     * @param jsessionid
+     * @return
+     */
+    UserInfoDTO getUserInfoBySessionId(String jsessionid);
 }

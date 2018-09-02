@@ -1,6 +1,7 @@
 package com.mermaid.application.user.util;
 
 import com.alibaba.druid.util.HttpClientUtils;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -18,7 +19,7 @@ import java.net.URL;
  */
 public class IPUtil {
     private static String TAOBAO_GETIP="http://ip.taobao.com/service/getIpInfo.php";
-    
+
     public static String getAddress(String ip) {
 
         String result = getResult(TAOBAO_GETIP,"ip="+ip,"utf-8");
@@ -31,7 +32,11 @@ public class IPUtil {
         if(temp.length < 3) {
             return ip;
         }
-        return ip;
+
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        result = data.getString("region") + "省" + data.getString("city") +"市" +data.getString("county") +"区/县"+ data.getString("area") + ";登陆网络：" +data.getString("isp");
+        return result;
     }
 
     private static String decodeUnicode(String theString) {
@@ -113,7 +118,7 @@ public class IPUtil {
             connection.setReadTimeout(3000);
             connection.setDoOutput(true);
             connection.setDoInput(true);
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("GET");
             connection.setUseCaches(false);
             connection.connect();
 
@@ -136,5 +141,10 @@ public class IPUtil {
             connection.disconnect();
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        String address = getAddress("118.178.186.33");
+        System.out.println(address);
     }
 }

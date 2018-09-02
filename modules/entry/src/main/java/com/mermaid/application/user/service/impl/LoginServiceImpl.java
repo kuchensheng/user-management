@@ -6,6 +6,8 @@ import com.github.pagehelper.PageHelper;
 import com.mermaid.application.constant.EnumLoginResult;
 import com.mermaid.application.constant.EnumLoginType;
 import com.mermaid.application.dto.LoginLogDTO;
+import com.mermaid.application.dto.SessionInfoDTO;
+import com.mermaid.application.dto.UserInfoDTO;
 import com.mermaid.application.user.dao.extension.LoginLogDomainExtensionMapper;
 import com.mermaid.application.user.dao.extension.SessionInfoDomainExtensionMapper;
 import com.mermaid.application.user.dao.extension.UserInfoDomainExtensionMapper;
@@ -13,15 +15,12 @@ import com.mermaid.application.user.model.LoginLogDomain;
 import com.mermaid.application.user.model.SessionInfoDomain;
 import com.mermaid.application.user.model.UserInfoDomain;
 import com.mermaid.application.user.service.LoginService;
-import com.mermaid.application.user.service.UserService;
 import com.mermaid.application.user.util.EnumHelperUtil;
 import com.mermaid.application.user.util.HttpRequestDeviceUtils;
 import com.mermaid.application.user.util.IPUtil;
 import com.mermaid.application.user.util.StringUtil;
 import com.mermaid.framework.mvc.BusinessException;
 import com.mermaid.framework.mvc.QueryResult;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +30,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Chensheng.Ku
@@ -56,21 +59,25 @@ public class LoginServiceImpl implements LoginService {
 
     private final Integer sessionExpired = 30;
 
+    private static final ExecutorService pool = Executors.newFixedThreadPool(10);
+
     @Override
     @Transactional
-    public Boolean login(String userName, String password, Date loginTime, String appI) {
+    public SessionInfoDTO login(String userName, String password, Date loginTime, String appI) {
         logger.info("用户登录，userName={}，clientIP={}",userName);
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
         EnumLoginResult result = EnumLoginResult.FAILURE;
         String clientIp = getIpAddress(request);
         UserInfoDomain userInfoDomain = userInfoDomainExtensionMapper.selectUserInfoByNameAndPassword(userName, StringUtil.parse2UUID(password),null);
         if(null == userInfoDomain) {
             throw BusinessException.withErrorCode("NOT_FOUND_USER").withErrorMessageArguments("用户不存在");
         }
-        HttpSession session = request.getSession();;
+        HttpSession session = request.getSession();
+        SessionInfoDomain sessionInfoDomain = null;
         if(null != userInfoDomain) {
             logger.info("判断用户是否已经登录了");
-            if(existedSession(session.getId())) {
+            if(existedSession(userInfoDomain.getId())) {
                 throw BusinessException.withErrorCode("CANNOT_REPEAT_LOGIN").withErrorMessageArguments("请勿重复登录");
             }
             session.setMaxInactiveInterval(sessionExpired * 60);
@@ -78,10 +85,14 @@ public class LoginServiceImpl implements LoginService {
             session.setAttribute("name",userInfoDomain.getName());
             logger.info("将session数据保存到sessionInfo表");
             String sessionInfo = JSONObject.toJSONString(session);
-            SessionInfoDomain sessionInfoDomain = new SessionInfoDomain();
+            sessionInfoDomain = new SessionInfoDomain();
             sessionInfoDomain.setSessionId(session.getId());
+            sessionInfoDomain.setUserId(userInfoDomain.getId());
 //            sessionInfoDomain.setSessionInfo(sessionInfo);
             sessionInfoDomain.setExpire(sessionExpired);
+            Date date = new Date();
+            sessionInfoDomain.setCreateTime(date);
+            sessionInfoDomain.setUpdateTime(date);
             sessionInfoDomainExtensionMapper.insertSelective(sessionInfoDomain);
             result = EnumLoginResult.SUCCESS;
         }
@@ -109,13 +120,32 @@ public class LoginServiceImpl implements LoginService {
         loginLogDomain.setUserName(userInfoDomain.getName());
         loginLogDomainExtensionMapper.insertSelective(loginLogDomain);
         logger.info("登录完成，登录结果={}",result.toString());
-        return true;
+
+        logger.info("设置cookie对象");
+        response.setHeader("requestId",session.getId());
+        response.addCookie(new Cookie("requestId",session.getId()));
+        return parseSessionInfoDomain2DTO(sessionInfoDomain);
+    }
+
+    public static SessionInfoDTO parseSessionInfoDomain2DTO(SessionInfoDomain sessionInfoDomain) {
+        if (sessionInfoDomain == null) {
+            return null;
+        }
+        SessionInfoDTO sessionInfoDTO = new SessionInfoDTO();
+        sessionInfoDTO.setSessionId(sessionInfoDomain.getSessionId());
+        sessionInfoDTO.setExpire(sessionInfoDomain.getExpire());
+        sessionInfoDTO.setCreateTime(sessionInfoDomain.getCreateTime());
+        sessionInfoDTO.setUserId(sessionInfoDomain.getUserId());
+        return sessionInfoDTO;
     }
 
     @Override
-    public void loginOut() {
+    public void loginOut(Integer userId) {
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         logger.info("用户登出，sessionId={}",request.getSession().getId());
+        if(existedSession(userId)) {
+            sessionInfoDomainExtensionMapper.deleteByUserId(userId);
+        }
         if(existedSession(request.getSession().getId())) {
             sessionInfoDomainExtensionMapper.deleteBySessionId(request.getSession().getId());
             request.getSession().removeAttribute("id");
@@ -129,8 +159,27 @@ public class LoginServiceImpl implements LoginService {
      * @return
      */
     private boolean existedSession(String sessionId) {
-        SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectBySessionId(sessionId);
-        return null != sessionInfoDomain;
+        final SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectBySessionId(sessionId);
+        Boolean resutl =  null != sessionInfoDomain;
+        if(resutl) {
+            logger.info("该session已存在，则更新session的时间");
+            pool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    SessionInfoDomain newOrder = new SessionInfoDomain();
+                    newOrder.setId(sessionInfoDomain.getId());
+                    newOrder.setUpdateTime(new Date());
+                    sessionInfoDomainExtensionMapper.updateByPrimaryKey(newOrder);
+                }
+            });
+        }
+        return resutl;
+    }
+
+    private boolean existedSession(Integer userId) {
+        SessionInfoDomain sessionInfoDomain = sessionInfoDomainExtensionMapper.selectByUserId(userId);
+        Boolean resutl =  null != sessionInfoDomain;
+        return resutl;
     }
 
     @Override
@@ -222,6 +271,40 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public Boolean deleteById(Integer sessionId) {
         return sessionInfoDomainExtensionMapper.deleteByPrimaryKey(sessionId) > 0;
+    }
+
+    @Override
+    public UserInfoDTO getUserInfoBySessionId(String jsessionid) {
+        logger.info("根据sessionid获取用户信息，sessionId={}",jsessionid);
+        if(!org.springframework.util.StringUtils.hasText(jsessionid)) {
+            logger.info("sessionId为空");
+            HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+            String sessionId = request.getSession().getId();
+            logger.info("从request请求到的sessionId={}",sessionId);
+            jsessionid = sessionId;
+        }
+        UserInfoDomain userInfoDomain = sessionInfoDomainExtensionMapper.selectUserBySessionId(jsessionid);
+
+        return parseUserInfo2DTO(userInfoDomain);
+    }
+
+    private UserInfoDTO parseUserInfo2DTO(UserInfoDomain userInfoDomain) {
+        if (userInfoDomain == null) {
+            return null;
+        }
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setId(userInfoDomain.getId());
+        userInfoDTO.setName(userInfoDomain.getName());
+        userInfoDTO.setAge(userInfoDomain.getAge());
+        userInfoDTO.setSex(userInfoDomain.getSex());
+        userInfoDTO.setStatus(userInfoDomain.getStatus());
+        userInfoDTO.setPhone(userInfoDomain.getPhone());
+        userInfoDTO.setEmail(userInfoDomain.getEmail());
+        userInfoDTO.setAvatarId(userInfoDomain.getAvatarId());
+        userInfoDTO.setQq(userInfoDomain.getQq());
+        userInfoDTO.setCreateTime(userInfoDomain.getCreateTime());
+        userInfoDTO.setAppId(userInfoDomain.getAppId());
+        return userInfoDTO;
     }
 
     private String getIpAddress(HttpServletRequest request) {

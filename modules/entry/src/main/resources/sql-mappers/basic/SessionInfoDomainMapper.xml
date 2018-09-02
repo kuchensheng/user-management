@@ -6,12 +6,14 @@
     <result column="sessionId" property="sessionId" jdbcType="VARCHAR" />
     <result column="expire" property="expire" jdbcType="INTEGER" />
     <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="userId" property="userId" jdbcType="INTEGER" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <resultMap id="ResultMapWithBLOBs" type="com.mermaid.application.user.model.SessionInfoDomain" extends="BaseResultMap" >
     <result column="sessionInfo" property="sessionInfo" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, sessionId, expire, createTime
+    id, sessionId, expire, createTime, userId, updateTime
   </sql>
   <sql id="Blob_Column_List" >
     sessionInfo
@@ -33,9 +35,11 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into sessionInfo (sessionId, expire, createTime, 
-      sessionInfo)
+      userId, updateTime, sessionInfo
+      )
     values (#{sessionId,jdbcType=VARCHAR}, #{expire,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{sessionInfo,jdbcType=LONGVARCHAR})
+      #{userId,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, #{sessionInfo,jdbcType=LONGVARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.mermaid.application.user.model.SessionInfoDomain" >
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
@@ -52,6 +56,12 @@
       <if test="createTime != null" >
         createTime,
       </if>
+      <if test="userId != null" >
+        userId,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
       <if test="sessionInfo != null" >
         sessionInfo,
       </if>
@@ -65,6 +75,12 @@
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
       </if>
       <if test="sessionInfo != null" >
         #{sessionInfo,jdbcType=LONGVARCHAR},
@@ -83,6 +99,12 @@
       <if test="createTime != null" >
         createTime = #{createTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="userId != null" >
+        userId = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
       <if test="sessionInfo != null" >
         sessionInfo = #{sessionInfo,jdbcType=LONGVARCHAR},
       </if>
@@ -94,6 +116,8 @@
     set sessionId = #{sessionId,jdbcType=VARCHAR},
       expire = #{expire,jdbcType=INTEGER},
       createTime = #{createTime,jdbcType=TIMESTAMP},
+      userId = #{userId,jdbcType=INTEGER},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP},
       sessionInfo = #{sessionInfo,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -101,7 +125,9 @@
     update sessionInfo
     set sessionId = #{sessionId,jdbcType=VARCHAR},
       expire = #{expire,jdbcType=INTEGER},
-      createTime = #{createTime,jdbcType=TIMESTAMP}
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      userId = #{userId,jdbcType=INTEGER},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

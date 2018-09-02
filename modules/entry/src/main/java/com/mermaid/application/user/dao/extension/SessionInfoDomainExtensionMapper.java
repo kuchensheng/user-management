@@ -2,6 +2,7 @@ package com.mermaid.application.user.dao.extension;
 
 import com.mermaid.application.user.dao.basic.SessionInfoDomainMapper;
 import com.mermaid.application.user.model.SessionInfoDomain;
+import com.mermaid.application.user.model.UserInfoDomain;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -24,4 +25,9 @@ public interface SessionInfoDomainExtensionMapper extends SessionInfoDomainMappe
      */
     List<SessionInfoDomain> selectAllSessionInfo();
 
+    UserInfoDomain selectUserBySessionId(@Param("sessionid") String sessionid);
+
+    SessionInfoDomain selectByUserId(@Param("userId") Integer userId);
+
+    void deleteByUserId(@Param("userId") Integer userId);
 }

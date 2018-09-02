@@ -2,6 +2,8 @@ package com.mermaid.application.user.controller;
 
 import com.mermaid.application.constant.EnumLoginResult;
 import com.mermaid.application.dto.LoginLogDTO;
+import com.mermaid.application.dto.SessionInfoDTO;
+import com.mermaid.application.dto.UserInfoDTO;
 import com.mermaid.application.user.service.LoginService;
 import com.mermaid.framework.mvc.APIResponse;
 import com.mermaid.framework.mvc.QueryResult;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.List;
+import java.util.jar.JarEntry;
 
 /**
  * @author Chensheng.Ku
@@ -36,7 +39,7 @@ public class LoginController {
 
     @ApiOperation(value = "用户登录")
     @RequestMapping(value = "/app/user/login",method = RequestMethod.POST)
-    public APIResponse<Boolean> login(
+    public APIResponse<SessionInfoDTO> login(
             @ApiParam(required = true,name = "name",value = "用户名") @RequestParam(value = "name") String name,
             @ApiParam(required = true,name = "password",value = "密码") @RequestParam(value = "password") String password,
             @ApiParam(name = "loinTime",value = "登录时间") @RequestParam(required = false,value = "loginTime") Date loginTime,
@@ -46,9 +49,11 @@ public class LoginController {
     }
 
     @ApiOperation(value = "登出")
-    @RequestMapping(value = "/app/user/login",method = RequestMethod.DELETE)
-    public APIResponse loginOut() {
-        loginService.loginOut();
+    @RequestMapping(value = "/app/user/login/{userId}",method = RequestMethod.DELETE)
+    public APIResponse loginOut(
+            @ApiParam(required = true,name = "userId",value = "用户Id") @PathVariable(value = "userId") Integer userId
+    ) {
+        loginService.loginOut(userId);
         return APIResponse.success();
     }
 
@@ -72,5 +77,13 @@ public class LoginController {
             @ApiParam(name = "pageSize",value = "页面大小") @RequestParam(required = false,value = "pageSize",defaultValue = "10") Integer pageSize
     ) {
         return APIResponse.success(loginService.selectLoginLogList(userId,appId,startTime,endTime,pageNum,pageSize));
+    }
+
+    @ApiOperation(value = "根据sessionId获取用户信息")
+    @RequestMapping(value = "/app/login/info",method = RequestMethod.GET)
+    public APIResponse<UserInfoDTO> getUserInfoBySessionId(
+            @ApiParam(name = "JSESSIONID",value = "sessionId") @RequestParam(required = false,value = "JSESSIONID") String JSESSIONID
+    ) {
+        return APIResponse.success(loginService.getUserInfoBySessionId(JSESSIONID));
     }
 }

@@ -43,9 +43,9 @@ public class ScheduleSession {
                 List<SessionInfoDomain> sessionInfoDomains = loginService.selectAllSessionInfo();
                 if(null != sessionInfoDomains && sessionInfoDomains.size() > 0) {
                     for (SessionInfoDomain sessionInfo : sessionInfoDomains) {
-                        Date createTime = sessionInfo.getCreateTime();
-                        if(null != createTime) {
-                            long createTimeLong = createTime.getTime();
+                        Date updateTime = sessionInfo.getUpdateTime();
+                        if(null != updateTime) {
+                            long createTimeLong = updateTime.getTime();
                             long currentTimeMillis = System.currentTimeMillis();
                             if((currentTimeMillis - createTimeLong) > sessionInfo.getExpire() * 60 * 1000) {
                                 logger.info("session超时，将失效，被删除，sessionId={}",sessionInfo.getSessionId());
