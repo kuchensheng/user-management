@@ -31,4 +31,11 @@ public interface UserInfoDomainExtensionMapper extends UserInfoDomainMapper {
      * @return
      */
     UserInfoDomain selectUserInfoByNameAndPassword(@Param("userName") String userName, @Param("password") String password,@Param("appId") String appId);
+
+    /**
+     * 获取用户数量
+     * @param appId
+     * @return
+     */
+    Integer selectUserCount(@Param("appId") String appId);
 }

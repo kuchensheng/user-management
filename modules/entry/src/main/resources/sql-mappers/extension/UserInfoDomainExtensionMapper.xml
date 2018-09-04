@@ -39,4 +39,12 @@
             AND appId = #{appId,jdbcType=VARCHAR}
         </if>
     </select>
+    <select id="selectUserCount" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM userInfo
+        <where>
+            <if test="appId != null and appId != ''">
+                AND appId = #{appId,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
 </mapper>

@@ -72,4 +72,5 @@ public interface UserService {
      */
     UserInfoDTO selectUserInfoDetail(Integer userId);
 
+    Integer selectUserCount(String appId);
 }
