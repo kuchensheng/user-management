@@ -184,24 +184,23 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public QueryResult<LoginLogDTO> selectLoginLogList(Integer userId, String appId, Date startTime, Date endTime, Integer pageNum, Integer pageSize) {
-        logger.info("查询登录日志，userId={}，appId={}");
-        Page<LoginLogDomain> loginLogDomainList = null;
-        PageHelper.startPage(pageNum,pageSize);
+        logger.info("查询登录日志，userId={}，appId={},pageNum={},pageSize={}",userId,appId,pageNum,pageSize);
+
+        List<Integer> userIdList = new ArrayList<>();
         if(null != userId) {
-            loginLogDomainList =loginLogDomainExtensionMapper.selectUserLoginLog(userId,startTime,endTime);
-        }else if(org.springframework.util.StringUtils.hasText(appId)) {
+            userIdList.add(userId);
+        } else if(org.springframework.util.StringUtils.hasText(appId)) {
             List<UserInfoDomain> userList = userInfoDomainExtensionMapper.selectUserInfoList(null, appId);
             if(null == userList) {
                 return null;
             }
-            List<Integer> userIdList = new ArrayList<>(userList.size());
             for (UserInfoDomain userInfo : userList) {
                 userIdList.add(userInfo.getId());
             }
-            loginLogDomainList = loginLogDomainExtensionMapper.selectUsersLoginLog(userIdList,startTime,endTime);
-        } else {
-            loginLogDomainList = loginLogDomainExtensionMapper.selectUsersLoginLog(null,startTime,endTime);
         }
+
+        PageHelper.startPage(pageNum, pageSize);
+        Page<LoginLogDomain> loginLogDomainList =loginLogDomainExtensionMapper.selectUsersLoginLog(userIdList,startTime,endTime);
         return parseListLogDomain2DTO(loginLogDomainList);
     }
 

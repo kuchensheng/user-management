@@ -6,7 +6,9 @@
       SELECT id, type, result, address, userName, userId, clientIp, createTime
       FROM login_log
       <where>
-        userId = #{userId,jdbcType=INTEGER}
+        <if test="userId != null">
+          userId = #{userId,jdbcType=INTEGER}
+        </if>
         <if test="startTime != null">
           AND createTime <![CDATA[>=]]> #{startTime}
         </if>
