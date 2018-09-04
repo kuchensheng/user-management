@@ -1,0 +1,8 @@
+com\mermaid\application\constant\EnumLoginType.class
+com\mermaid\application\dto\LoginLogDTO.class
+com\mermaid\application\constant\EnumUserStatus.class
+com\mermaid\application\constant\EnumLoginResult.class
+com\mermaid\application\dto\UserInfoDTO.class
+com\mermaid\application\dto\SessionInfoDTO.class
+com\mermaid\application\api\UserCloudService.class
+com\mermaid\application\constant\EnumSex.class
