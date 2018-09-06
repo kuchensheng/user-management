@@ -24,6 +24,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.mermaid.framework</groupId>
+            <artifactId>mermaid-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sdk</artifactId>
         </dependency>
