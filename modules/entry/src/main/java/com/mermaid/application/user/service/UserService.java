@@ -49,7 +49,7 @@ public interface UserService {
      * @param appId 所属应用/公司
      * @return
      */
-    Boolean updateUser(Integer userId,String name,String password,String age,EnumSex sex,EnumUserStatus status,String phone,String email,Integer avatarId,String qq,Date updateTime,String appId);
+    Boolean updateUser(Integer userId,String name,String oldPassword,String password,String age,EnumSex sex,EnumUserStatus status,String phone,String email,Integer avatarId,String qq,Date updateTime,String appId);
 
     /**
      * 删除用户信息

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -63,21 +64,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean updateUser(Integer userId, String name, String password, String age, EnumSex sex, EnumUserStatus status, String phone, String email, Integer avatarId, String qq, Date updateTime, String appId) {
+    public Boolean updateUser(Integer userId, String name, String oldPassword, String password, String age, EnumSex sex, EnumUserStatus status, String phone, String email, Integer avatarId, String qq, Date updateTime, String appId) {
         logger.info("更新用户信息，userId={},appId={}",userId,appId);
+        UserInfoDomain userInfoDTO = selectUserInfo(userId);
         UserInfoDomain userInfoDomain = new UserInfoDomain();
+        if(null == userInfoDTO) {
+            throw BusinessException.withErrorCode("NOT_FOUND_DATA").withErrorMessageArguments("用户不存在");
+        }
+        if(StringUtils.hasText(password)) {
+            logger.info("包含密码变更,判断原密码是否与存储密码匹配");
+            if(StringUtils.isEmpty(oldPassword)) {
+                throw BusinessException.withErrorCode("OLD_PASSWORD_IS_NULL").withErrorMessageArguments("原密码不能为空");
+            }
+            if(!StringUtil.parse2UUID(oldPassword).equals(userInfoDTO.getPassword())) {
+                throw BusinessException.withErrorCode("OLD_PASSWORD_IS_ERROR").withErrorMessageArguments("原密码不正确");
+            }
+            userInfoDomain.setPassword(StringUtil.parse2UUID(password));
+        }
+
         userInfoDomain.setId(userId);
         userInfoDomain.setAge(age);
         userInfoDomain.setAvatarId(avatarId);
         userInfoDomain.setAppId(appId);
         userInfoDomain.setEmail(email);
         userInfoDomain.setName(name);
-        userInfoDomain.setPassword(StringUtil.parse2UUID(password));
         userInfoDomain.setPhone(phone);
         userInfoDomain.setQq(qq);
-        userInfoDomain.setSex(String.valueOf(sex.getValue()));
-        userInfoDomain.setStatus(String.valueOf(status.getValue()));
+        if(null != sex) {
+            userInfoDomain.setSex(String.valueOf(sex.getValue()));
+        }
+        if(null != status) {
+            userInfoDomain.setStatus(String.valueOf(status.getValue()));
+        }
         int i = userInfoDomainExtensionMapper.updateByPrimaryKeySelective(userInfoDomain);
+        logger.info("修改完毕");
         return i > 0;
     }
 
@@ -115,8 +135,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoDTO selectUserInfoDetail(Integer userId) {
         logger.info("获取用户详情，userId={}",userId);
-        UserInfoDomain userInfoDomain = userInfoDomainExtensionMapper.selectByPrimaryKey(userId);
+        UserInfoDomain userInfoDomain = selectUserInfo(userId);
         return parseUserInfoDomain2DTO(userInfoDomain);
+    }
+
+    private UserInfoDomain selectUserInfo(Integer userId) {
+        return userInfoDomainExtensionMapper.selectByPrimaryKey(userId);
     }
 
     private UserInfoDTO parseUserInfoDomain2DTO(UserInfoDomain userInfoDomain) {
