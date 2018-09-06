@@ -103,4 +103,12 @@ public class UserController {
     ) {
         return APIResponse.success(userService.selectUserInfos(null,appId));
     }
+
+    @ApiOperation(value = "获取用户数量")
+    @RequestMapping(value = "/app/user/count",method = RequestMethod.GET)
+    public APIResponse<Integer> getUserCount(
+            @ApiParam(name = "appId",value = "应用Id") @RequestParam(value = "appId",required = false) String appId
+    ) {
+        return APIResponse.success(userService.selectUserCount(appId));
+    }
 }

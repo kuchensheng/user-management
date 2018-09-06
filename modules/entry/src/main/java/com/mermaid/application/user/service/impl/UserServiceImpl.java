@@ -137,4 +137,10 @@ public class UserServiceImpl implements UserService {
         userInfoDTO.setAppId(userInfoDomain.getAppId());
         return userInfoDTO;
     }
+
+    @Override
+    public Integer selectUserCount(String appId) {
+        logger.info("获取用户数量={}",appId);
+        return userInfoDomainExtensionMapper.selectUserCount(appId);
+    }
 }
